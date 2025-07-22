@@ -1,5 +1,5 @@
 import reflex as rx
-from llm_frontend.style import create_colors_dict
+from llm_hugo_course.style import create_colors_dict
 
 tailwind_config={
     "darkMode": "class",   
@@ -11,7 +11,7 @@ tailwind_config={
 }
 
 config = rx.Config(
-    app_name="llm_frontend",    
+    app_name="llm_hugo_course",    
     api_url="http://localhost:9000",    
     backend_port=9000,
     deployment_name="deployment",    
