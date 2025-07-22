@@ -1,5 +1,5 @@
 import reflex as rx
-from llm_frontend.components.hint import hint
+from llm_hugo_course.components.hint import hint
 
 badge_svg = """<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
 <rect width="16" height="16" rx="2" fill="#6E56CF"/>

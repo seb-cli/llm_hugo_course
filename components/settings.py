@@ -1,7 +1,7 @@
 import reflex as rx
 from reflex.style import set_color_mode, color_mode
-from llm_frontend.state import SettingsState
-from llm_frontend.components.hint import hint
+from llm_hugo_course.state import SettingsState
+from llm_hugo_course.components.hint import hint
 
 
 def color_item(color: str) -> rx.Component:

@@ -1,7 +1,7 @@
 import os
 import reflex as rx
-from llm_frontend.components.badge import made_with_reflex
-from llm_frontend.state import State, UploadState, ModelSelectionState, ManualRAGState
+from llm_hugo_course.components.badge import made_with_reflex
+from llm_hugo_course.state import State, UploadState, ModelSelectionState, ManualRAGState
 
 
 def qa(question: str, answer: str) -> rx.Component:

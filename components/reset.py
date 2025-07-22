@@ -1,6 +1,6 @@
 import reflex as rx
-from llm_frontend.state import State
-from llm_frontend.components.hint import hint
+from llm_hugo_course.state import State
+from llm_hugo_course.components.hint import hint
 
 
 def reset() -> rx.Component:

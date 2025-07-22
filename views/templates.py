@@ -1,5 +1,5 @@
 import reflex as rx
-from llm_frontend.state import State
+from llm_hugo_course.state import State
 
 
 def template_card(icon: str, title: str, description: str, color: str) -> rx.Component:
