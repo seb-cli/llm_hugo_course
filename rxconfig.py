@@ -12,9 +12,10 @@ tailwind_config={
 
 config = rx.Config(
     app_name="llm_hugo_course",    
-    api_url="http://localhost:9000",    
+    # api_url="http://localhost:9000",    
+    api_url="http:0.0.0.0:8000",
     backend_port=9000,
-    deployment_name="deployment",    
+    # deployment_name="deployment",    
     # plugins=[rx.plugins.TailwindV3Plugin()],    
     # # tailwind=None,
     plugins=[

@@ -27,12 +27,12 @@ import modal
 # The `app.py` script imports three third-party packages, so we include these in the example's
 # image definition and then add the `app.py` file itself to the image.
 
-reflex_script_local_path = Path(__file__).parent / "llm_hugo_course.py"
-reflex_script_remote_path = "/root/llm_hugo_course.py"
+reflex_script_local_path = Path(__file__).parent / "llm_hugo_course/llm_hugo_course.py"
+reflex_script_remote_path = "/root/llm_hugo_course/llm_hugo_course.py"
 
 image = (
     modal.Image.debian_slim(python_version="3.13")
-    .pip_install("modal==1.1.0","reflex==0.8.3","python-dotenv==1.1.1","PyMuPDF==1.26.3","httpx==0.28.1","openai==1.97.1")
+    .pip_install("modal","reflex==0.8.3","python-dotenv==1.1.1","PyMuPDF==1.26.3","httpx==0.28.1","openai==1.97.1")
     .add_local_file(
         reflex_script_local_path,
         reflex_script_remote_path,
@@ -57,7 +57,7 @@ if not reflex_script_local_path.exists():
 @modal.web_server(8000)
 def run():
     target = shlex.quote(reflex_script_remote_path)
-    cmd = f"reflex run" #{target} --server.port 8000 --server.enableCORS=false --server.enableXsrfProtection=false"
+    cmd = f"reflex run --env prod" #{target} --server.port 8000 --server.enableCORS=false --server.enableXsrfProtection=false"
     subprocess.Popen(cmd, shell=True)
 
 
