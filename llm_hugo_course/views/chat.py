@@ -1,7 +1,7 @@
 import os
 import reflex as rx
-from llm_hugo_course.components.badge import made_with_reflex
-from llm_hugo_course.state import State, UploadState, ModelSelectionState, ManualRAGState
+from llm_frontend.components.badge import made_with_reflex
+from llm_frontend.state import State, UploadState, ModelSelectionState, ManualRAGState
 
 
 def qa(question: str, answer: str) -> rx.Component:
@@ -72,45 +72,6 @@ def select_llm_engine():
     )
 
 
-def action_bar() -> rx.Component:
-    return rx.box(
-        rx.box(
-            rx.el.input(
-                placeholder="Ask anything",
-                on_blur=State.set_question,
-                id="input1",
-                class_name="box-border bg-slate-3 px-4 py-2 pr-14 rounded-full w-full outline-none focus:outline-accent-10 h-[48px] text-slate-12 placeholder:text-slate-9",
-            ),
-            rx.el.button(
-                rx.cond(
-                    State.processing,
-                    rx.icon(
-                        tag="loader-circle",
-                        size=19,
-                        color="white",
-                        class_name="animate-spin",
-                    ),
-                    rx.icon(tag="arrow-up", size=19, color="white"),
-                ),
-                on_click=[State.answer, rx.set_value("input1", "")],
-                class_name="top-1/2 right-4 absolute bg-accent-9 hover:bg-accent-10 disabled:hover:bg-accent-9 opacity-65 disabled:opacity-50 p-1.5 rounded-full transition-colors -translate-y-1/2 cursor-pointer disabled:cursor-default",
-                disabled=rx.cond(
-                    State.processing | (State.question == ""), True, False
-                ),
-            ),
-            class_name="relative w-full",
-        ),
-        # Select the LLM engine
-        # select_llm_engine(),
-        # Made with Reflex link
-        made_with_reflex(),
-        class_name="flex flex-col justify-center items-center gap-6 w-full",
-    )
-
-
-color = "rgb(107,99,246)"
-
-
 def rag_input():
     """The main view."""
     return rx.vstack(
@@ -124,7 +85,7 @@ def rag_input():
         rx.hstack(
             rx.upload.root(
                 rx.button(
-                    "Select File(s) for context (RAG)",
+                    "Select File(s) for Context (RAG)",
                 ),
                 multiple=True,
                 id="upload1",
@@ -170,3 +131,45 @@ def rag_input():
         display=rx.cond(State.chat_history, "none", "flex"),
         # padding="5em",
     )
+
+
+def action_bar() -> rx.Component:
+    return rx.box(
+        rag_input(),
+        rx.box(
+            rx.el.input(
+                placeholder="Ask anything",
+                on_blur=State.set_question,
+                id="input1",
+                class_name="box-border bg-slate-3 px-4 py-2 pr-14 rounded-full w-full outline-none focus:outline-accent-10 h-[48px] text-slate-12 placeholder:text-slate-9",
+            ),
+            rx.el.button(
+                rx.cond(
+                    State.processing,
+                    rx.icon(
+                        tag="loader-circle",
+                        size=19,
+                        color="white",
+                        class_name="animate-spin",
+                    ),
+                    rx.icon(tag="arrow-up", size=19, color="white"),
+                ),
+                on_click=[State.answer, rx.set_value("input1", "")],
+                class_name="top-1/2 right-4 absolute bg-accent-9 hover:bg-accent-10 disabled:hover:bg-accent-9 opacity-65 disabled:opacity-50 p-1.5 rounded-full transition-colors -translate-y-1/2 cursor-pointer disabled:cursor-default",
+                disabled=rx.cond(
+                    State.processing | (State.question == ""), True, False
+                ),
+            ),
+            class_name="relative w-full",
+        ),
+        # Select the LLM engine
+        # select_llm_engine(),
+        # Made with Reflex link
+        made_with_reflex(),
+        class_name="flex flex-col justify-center items-center gap-6 w-full",
+    )
+
+
+color = "rgb(107,99,246)"
+
+

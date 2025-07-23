@@ -33,8 +33,6 @@ def index() -> rx.Component:
             templates(),
             # Chat history
             chat(),
-            # RAG input
-            rag_input(),
             # Action bar
             action_bar(),
             class_name="relative flex flex-col justify-between gap-20 mx-auto px-6 pt-16 lg:pt-6 pb-6 max-w-4xl h-screen",

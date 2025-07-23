@@ -14,9 +14,16 @@ def template_card(icon: str, title: str, description: str, color: str) -> rx.Com
 
 def templates() -> rx.Component:
     return rx.box(
+        rx.heading("Word Map"),
         rx.image(
-            src="/vanishing_gradients.jpeg",
-            class_name="opacity-70 w-auto h-11 pointer-events-none",
+            src="/word_map.png",
+            height="200px",
+            border_radius="150px 150px",
+            # class_name="opacity-70 w-auto h-11 pointer-events-none",
+        ),
+        rx.hstack(
+           rx.text.kbd("Enter"),
+           rx.text("the world of your documents", size="4")
         ),
         rx.box(
             template_card(

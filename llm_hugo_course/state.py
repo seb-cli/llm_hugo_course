@@ -68,28 +68,28 @@ class UploadState(rx.State):
         return UploadState.cancel_upload
 
 
-class ManualRAGState(rx.State):
-    """Naive manual RAG implementation."""
+# class ManualRAGState(rx.State):
+#     """Naive manual RAG implementation."""
 
-    rag_input: list[tuple] = []
+#     rag_input: list[tuple] = []
 
-    # Extract text from all pages of a PDF and return it in one chunk
-    def extract_text_from_pdf(self, pdf_bytes):
-        pdf_doc = fitz.open(stream=pdf_bytes, filetype="pdf")
-        text = ""
-        for page_num in range(pdf_doc.page_count):
-            page = pdf_doc.load_page(page_num)
-            text += page.get_text("text")
+#     # Extract text from all pages of a PDF and return it in one chunk
+#     def extract_text_from_pdf(self, pdf_bytes):
+#         pdf_doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+#         text = ""
+#         for page_num in range(pdf_doc.page_count):
+#             page = pdf_doc.load_page(page_num)
+#             text += page.get_text("text")
         
-        self.rag_input.append(pdf_bytes, text)
-        # return text
+#         self.rag_input.append(pdf_bytes, text)
+#         # return text
 
-    def query_pdf(self):#, query: str, model_engine: str):
-        rx.foreach(
-            UploadState.all_uploaded_files,
-            lambda f: self.extract_text_from_pdf(rx.get_upload_url(f))
-        )
-        return self.rag_input
+#     def query_pdf(self):#, query: str, model_engine: str):
+#         rx.foreach(
+#             UploadState.all_uploaded_files,
+#             lambda f: self.extract_text_from_pdf(rx.get_upload_url(f))
+#         )
+#         return self.rag_input
 
         # if pdf is None:
         #     return "please upload a pdf."
