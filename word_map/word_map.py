@@ -9,7 +9,7 @@ from word_map.views.chat import chat, action_bar, rag_input
 
 
 @rx.page(
-    title="Chatbot",
+    title="Word Map",
     description="A chatbot powered by Reflex!",
     on_load=UploadState.clear_all_uploaded_files)
 def index() -> rx.Component:

@@ -7,7 +7,7 @@ anyio==4.9.0
 attrs==25.3.0
 bidict==0.23.1
 certifi==2025.7.14
-click==8.2.0
+click==8.2.1
 distro==1.9.0
 fastapi==0.116.1
 frozenlist==1.7.0

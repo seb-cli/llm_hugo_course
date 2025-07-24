@@ -77,7 +77,6 @@ class State(rx.State):
     # Extract text from all pages of a PDF and return it in one chunk
     def extract_text_from_pdf(self, pdf_bytes):
         pdf_doc = fitz.open(pdf_bytes)
-        # pdf_doc = fitz.open(stream=pdf_bytes, filetype="pdf")
         text = ""
         for page_num in range(pdf_doc.page_count):
             page = pdf_doc.load_page(page_num)
@@ -136,7 +135,7 @@ class State(rx.State):
         self.query_pdf()
 
         response = client.chat.completions.create(
-            model="google/gemma-3n-e4b-it:free",#ModelSelectionState.llm_engine, 
+            model="openai/gpt-3.5-turbo" # "google/gemma-3n-e4b-it:free",#ModelSelectionState.llm_engine, 
             messages=[
                 {
                     "role": "user",

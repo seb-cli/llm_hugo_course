@@ -16,6 +16,7 @@
 # 2. `app.py`, which is any Streamlit script to be mounted into the Modal
 # function ([download script](https://github.com/modal-labs/modal-examples/blob/main/10_integrations/streamlit/app.py)).
 
+import os
 import shlex
 import subprocess
 from pathlib import Path
@@ -27,23 +28,32 @@ import modal
 # The `app.py` script imports three third-party packages, so we include these in the example's
 # image definition and then add the `app.py` file itself to the image.
 
-reflex_script_local_path = Path(__file__).parent / "word_map/word_map.py"
-reflex_script_remote_path = "/root/word_map/word_map.py"
+# reflex_script_local_path = Path(__file__).parent / "word_map/word_map.py"
+# reflex_script_remote_path = "/root/word_map/word_map.py"
+reflex_script_local_dir = Path(__file__).parent  
+reflex_script_remote_dir = "/root/"
+
 
 image = (
     modal.Image.debian_slim(python_version="3.13")
-    .pip_install("modal","reflex==0.8.3","python-dotenv==1.1.1","PyMuPDF==1.26.3","httpx==0.28.1","openai==1.97.1")
-    .add_local_file(
-        reflex_script_local_path,
-        reflex_script_remote_path,
+    .apt_install(["unzip", "curl"])
+    .pip_install("modal==1.1.0","reflex","python-dotenv==1.1.1","PyMuPDF==1.26.3","httpx==0.28.1","openai==1.97.1")
+    # .add_local_file(
+        # reflex_script_local_path,
+        # reflex_script_remote_path,
+    # )
+    .add_local_dir(
+        reflex_script_local_dir,
+        reflex_script_remote_dir,
     )
 )
 
-app = modal.App(name="chatbot-hugo-course", image=image)
+app = modal.App(name="word_map", image=image)
 
-if not reflex_script_local_path.exists():
+if not reflex_script_local_dir.exists():
     raise RuntimeError(
-        "word_map.py not found! Place the script with your reflex app in the same directory."
+        "word_map DIR not found!"
+        # "word_map.py not found! Place the script with your reflex app in the same directory."
     )
 
 # ## Spawning the Streamlit server
@@ -51,13 +61,16 @@ if not reflex_script_local_path.exists():
 # Inside the container, we will run the Streamlit server in a background subprocess using
 # `subprocess.Popen`. We also expose port 8000 using the `@web_server` decorator.
 
+@app.function(secrets=[modal.Secret.from_name("openrouter-secret")])
+def f():
+    print(os.environ["OPENROUTER_API_KEY"])
 
 @app.function()
 @modal.concurrent(max_inputs=100)
 @modal.web_server(8000)
 def run():
-    target = shlex.quote(reflex_script_remote_path)
-    cmd = f"reflex run --env prod" #{target} --server.port 8000 --server.enableCORS=false --server.enableXsrfProtection=false"
+    # target = shlex.quote(reflex_script_remote_path)
+    cmd = f"REFLEX_API_URL=http://0.0.0.0:8000 reflex run --env prod" # {target} --server.port 8000 --server.enableCORS=false --server.enableXsrfProtection=false"
     subprocess.Popen(cmd, shell=True)
 
 
