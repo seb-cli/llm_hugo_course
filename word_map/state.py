@@ -16,7 +16,8 @@ class SettingsState(rx.State):
     # The font family for the app
     font_family: str = "Poppins"
 
-class ModelSelectionState(rx.State):
+
+class ModelSelectionMixin(rx.State, mixin=True):
     llm_engine: str = "google/gemma-3n-e4b-it:free"
 
     @rx.event
@@ -69,7 +70,8 @@ class UploadState(rx.State):
 
 
 
-class State(rx.State):
+class State(ModelSelectionMixin, rx.State):
+    """General App State."""
     rag_input: list[dict] = []
     query_engine: str
     nb_input_tokens: int
@@ -135,7 +137,7 @@ class State(rx.State):
         self.query_pdf()
 
         response = client.chat.completions.create(
-            model="openai/gpt-3.5-turbo" # "google/gemma-3n-e4b-it:free",#ModelSelectionState.llm_engine, 
+            model= "google/gemma-3n-e4b-it:free",
             messages=[
                 {
                     "role": "user",

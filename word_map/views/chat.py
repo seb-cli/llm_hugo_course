@@ -1,7 +1,7 @@
 import os
 import reflex as rx
 from word_map.components.badge import made_with_reflex
-from word_map.state import State, UploadState, ModelSelectionState #, ManualRAGState
+from word_map.state import State, UploadState, ModelSelectionMixin #, ManualRAGState
 
 
 def qa(question: str, answer: str) -> rx.Component:
@@ -20,7 +20,7 @@ def qa(question: str, answer: str) -> rx.Component:
                 rx.badge(f"{State.query_engine}"),
                 rx.box(
                     rx.image(
-                        src="vanishing_gradients.jpeg",
+                        src="word_map.png",
                         class_name="h-6" + rx.cond(State.processing, " animate-pulse", ""),
                     ),
                 ),
@@ -64,11 +64,11 @@ def chat() -> rx.Component:
 def select_llm_engine():
     return rx.center(
         rx.select(
-            ["google/gemma-3n-e4b-it:free", "openai/blabla", "deepseek/blabla"],
-            value=ModelSelectionState.llm_engine,
-            on_change=ModelSelectionState.change_value,
+            ["google/gemma-3n-e4b-it:free", "openai/gpt-3.5-turbo", "deepseek/deepseek-r1-0528:free"],
+            value=State.llm_engine,
+            on_change=State.change_value,
         ),
-        rx.badge(ModelSelectionState.llm_engine),
+        rx.badge(State.llm_engine),
     )
 
 
@@ -163,7 +163,7 @@ def action_bar() -> rx.Component:
             class_name="relative w-full",
         ),
         # Select the LLM engine
-        # select_llm_engine(),
+        select_llm_engine(),
         # Made with Reflex link
         made_with_reflex(),
         class_name="flex flex-col justify-center items-center gap-6 w-full",
