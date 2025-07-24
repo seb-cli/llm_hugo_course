@@ -137,7 +137,7 @@ class State(ModelSelectionMixin, rx.State):
         self.query_pdf()
 
         response = client.chat.completions.create(
-            model= "google/gemma-3n-e4b-it:free",
+            model= self.llm_engine,
             messages=[
                 {
                     "role": "user",
