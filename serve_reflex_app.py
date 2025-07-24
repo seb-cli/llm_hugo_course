@@ -27,8 +27,8 @@ import modal
 # The `app.py` script imports three third-party packages, so we include these in the example's
 # image definition and then add the `app.py` file itself to the image.
 
-reflex_script_local_path = Path(__file__).parent / "llm_hugo_course/llm_hugo_course.py"
-reflex_script_remote_path = "/root/llm_hugo_course/llm_hugo_course.py"
+reflex_script_local_path = Path(__file__).parent / "word_map/word_map.py"
+reflex_script_remote_path = "/root/word_map/word_map.py"
 
 image = (
     modal.Image.debian_slim(python_version="3.13")
@@ -43,7 +43,7 @@ app = modal.App(name="chatbot-hugo-course", image=image)
 
 if not reflex_script_local_path.exists():
     raise RuntimeError(
-        "llm_hugo_course.py not found! Place the script with your reflex app in the same directory."
+        "word_map.py not found! Place the script with your reflex app in the same directory."
     )
 
 # ## Spawning the Streamlit server
