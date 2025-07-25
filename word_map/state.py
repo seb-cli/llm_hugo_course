@@ -165,6 +165,19 @@ class State(ModelSelectionMixin, rx.State):
         answer = ""
         yield
 
+        async for item in response:
+            if hasattr(item.choices[0].delta, "content"):
+                if item.choices[0].delta.content is None:
+                    break
+                answer += item.choices[0].delta.content
+                self.chat_history[-1] = (self.chat_history[-1][0], answer)
+                yield
+
+        # Ensure the final answer is added to chat history
+        if answer:
+            self.chat_history[-1] = (self.chat_history[-1][0], answer)
+            yield
+
         # Set the processing state to False.
         self.processing = False
 
