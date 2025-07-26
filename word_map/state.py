@@ -1,13 +1,14 @@
 import asyncio
 from dotenv import load_dotenv
 import fitz # PyMuPDF
-# import json
+import json
 import os
 import uuid
 
 import httpx
 import reflex as rx
 from openai import OpenAI, AsyncOpenAI
+from types import SimpleNamespace
 
 class SettingsState(rx.State):
     # The accent color for the app
@@ -125,30 +126,51 @@ class State(ModelSelectionMixin, rx.State):
         # Yield here to clear the frontend input before continuing.
         yield
 
-        
         # client = httpx.AsyncClient()
+
+        # call the agentic workflow
+        # input_payload = {
+        #     "chat_history_dicts": chat_history_dicts,
+        #     "user_input": question,
+        # }
+        # input_headers = {
+        #     "Authorization": f"Bearer {os.environ.get('OPENROUTER_API_KEY')}",
+        #     "Content-Type": "application/json",
+        # }
+
+        # deployment_name = os.environ.get("DEPLOYMENT_NAME", "MyDeployment")
+        # apiserver_url = "https://openrouter.ai/api/v1/chat/completions",
+        # response = await client.post(
+        #     f"{apiserver_url}",
+        #     headers=input_headers,
+        #     json={"input": json.dumps(input_payload)},
+        #     timeout=60,
+        # )
+        # answer = response.text
+
+
         load_dotenv(".env")
-        client = OpenAI(
+        client = AsyncOpenAI(
             base_url="https://openrouter.ai/api/v1",
             api_key=os.environ.get("OPENROUTER_API_KEY"),
             )
 
-       
         self.query_pdf()
 
-        response = client.chat.completions.create(
+        response = await client.chat.completions.create(
             model= self.llm_engine,
             messages=[
                 {
                     "role": "user",
                     "content": f"{self.rag_input}. Consider all preceding content as PROMPT_CONTEXT. On the basis of PROMPT_CONTEXT, {question}",
                 }
-            ],  
+            ], 
         )
 
         answer = response.choices[0].message.content
         self.query_engine = response.model
         self.nb_input_tokens = response.usage.prompt_tokens
+
 
         for i in range(len(answer)):
             # Pause to show the streaming effect.
@@ -165,11 +187,40 @@ class State(ModelSelectionMixin, rx.State):
         answer = ""
         yield
 
-        async for item in response:
-            if hasattr(item.choices[0].delta, "content"):
-                if item.choices[0].delta.content is None:
+        # async for item in json.loads(json.dumps(serial_response), 
+        #                              object_hook=lambda item: SimpleNamespace(**item)):
+        
+        # async for chunk in response:
+        #     if not chunk.choices:
+        #         continue
+        #     delta = chunk.choices[0].delta
+        #     if getattr(delta, "content", None) is None:
+        #         break
+        #     answer += delta.content
+        #     self.chat_history[-1] = (self.chat_history[-1][0], answer)
+        #     yield delta.content
+
+        async def async_choices(response):
+            for choice in response.choices[0]:
+                if isinstance(choice, tuple):
+                    choice = choice[0]
+                if hasattr(choice, "delta"):
+                    yield choice
+
+
+        # async for choice in async_choices(response):
+        #     delta = choice.delta
+        #     if delta and delta.content:
+        #         answer += delta.content
+        #         self.chat_history[-1] = (self.chat_history[-1][0], answer)
+
+
+
+        async for choice in async_choices(response):
+            if hasattr(choice.delta, "content"):
+                if choice.delta.content is None:
                     break
-                answer += item.choices[0].delta.content
+                answer += choice.delta.content
                 self.chat_history[-1] = (self.chat_history[-1][0], answer)
                 yield
 
