@@ -1,10 +1,10 @@
 import os
 import reflex as rx
 from word_map.components.badge import made_with_reflex
-from word_map.state import State, UploadState, ModelSelectionMixin #, ManualRAGState
+from word_map.state import State, UploadState #, ModelSelectionMixin #, ManualRAGState
 
 
-def qa(question: str, answer: str) -> rx.Component:
+def qa(question: str, answer: str, model: str, nb_input_tokens: int, nb_output_tokens: int) -> rx.Component:
     return rx.box(
         # Question
         rx.box(
@@ -17,7 +17,7 @@ def qa(question: str, answer: str) -> rx.Component:
         # Answer
         rx.box(
             rx.vstack(
-                rx.badge(f"{State.query_engine}"),
+                rx.badge(model),
                 rx.box(
                     rx.image(
                         src="word_map.png",
@@ -32,7 +32,7 @@ def qa(question: str, answer: str) -> rx.Component:
                 ),
                 rx.box(
                     rx.hstack(
-                        rx.badge(f"Nb tokens in first prompt = {State.nb_input_tokens} "),
+                        rx.badge(f"Input tokens = {nb_input_tokens}. Output tokens = {nb_output_tokens} "),
                         rx.el.button(
                             rx.icon(tag="copy", size=18),
                             class_name="p-1 text-slate-10 hover:text-slate-11 transform transition-colors cursor-pointer",
@@ -55,13 +55,13 @@ def chat() -> rx.Component:
     return rx.scroll_area(
         rx.foreach(
             State.chat_history,
-            lambda messages: qa(messages[0], messages[1]),
+            lambda messages: qa(messages[0], messages[1], messages[2], messages[3], messages[4]),
         ),
         scrollbars="vertical",
         class_name="w-full",
     )
 
-def select_llm_engine():
+def select_llm_engine() -> rx.Component:
     return rx.center(
         rx.select(
             ["google/gemma-3n-e4b-it:free", "openai/gpt-3.5-turbo", "deepseek/deepseek-r1-0528:free"],
@@ -72,7 +72,7 @@ def select_llm_engine():
     )
 
 
-def rag_input():
+def rag_input() -> rx.Component:
     """The main view."""
     return rx.vstack(
         rx.hstack(
@@ -113,7 +113,7 @@ def rag_input():
         ),
         rx.button(
             "Cancel Upload",
-            on_click=UploadState.cancel_upload(),
+            on_click=UploadState.cancel_upload,
             class_name="left-3 relative bg-accent-9 hover:bg-accent-10 disabled:hover:bg-accent-9 opacity-65 disabled:opacity-50 p-1.5 rounded-full transition-colors -translate-y-1/2 cursor-pointer disabled:cursor-default",
         ),
         # rx.hstack(

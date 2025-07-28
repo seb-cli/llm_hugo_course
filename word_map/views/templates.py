@@ -8,6 +8,7 @@ def template_card(icon: str, title: str, description: str, color: str) -> rx.Com
         rx.text(title, class_name="font-medium text-slate-11 text-sm"),
         rx.text(description, class_name="text-slate-10 text-xs"),
         class_name="relative align-top flex flex-col gap-2 border-slate-4 bg-slate-1 hover:bg-slate-3 shadow-sm px-3 pt-3 pb-4 border rounded-2xl text-[15px] text-start transition-colors",
+        # on_click=lambda: State.ask_answer_question(description),
         on_click=[State.set_question(description), State.answer],
     )
 

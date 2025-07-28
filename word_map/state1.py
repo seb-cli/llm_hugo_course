@@ -5,9 +5,10 @@ import json
 import os
 import uuid
 
+import httpx
 import reflex as rx
-# from openai import OpenAI
-import openai
+from openai import OpenAI, AsyncOpenAI
+from types import SimpleNamespace
 
 class SettingsState(rx.State):
     # The accent color for the app
@@ -27,14 +28,16 @@ class ModelSelectionMixin(rx.State, mixin=True):
 
 
 class UploadState(rx.State):
-    """State for uploading one or multiple files, e.g. RAG context."""
+    """State to upload one or multiple files, e.g in RAG context."""
 
     # The documents to list
     rag_document: list[str] = []
-    all_uploaded_files: list[str] = []
+    all_uploaded_files: list
 
     @rx.event
-    async def handle_upload(self, files: list[rx.UploadFile]):
+    async def handle_upload(
+        self, files: list[rx.UploadFile]
+    ):
         """Handle the upload of file(s).
 
         Args:
@@ -50,8 +53,10 @@ class UploadState(rx.State):
 
             # Update the rag_document var.
             self.rag_document.append(file.name)
-        self.all_uploaded_files = [f for f in os.listdir(rx.get_upload_dir())]
 
+    # @rx.event
+    # def update_uploaded_docs(self):
+    #     self.all_uploaded_files = [f for f in os.listdir(rx.get_upload_dir())]
 
     @rx.event
     def cancel_upload(self):
@@ -61,38 +66,15 @@ class UploadState(rx.State):
     @rx.event
     def clear_all_uploaded_files(self):
         for f in os.listdir(rx.get_upload_dir()):
-            os.remove(rx.get_upload_dir() / f)
-        self.all_uploaded_files = []
-        self.rag_document.clear()
-        return rx.cancel_upload("upload1")
-
-
-# Load environment variables
-load_dotenv(".env")
-# AsyncOpenAI not supported by OpenRouter
-client = openai.OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=os.environ.get("OPENROUTER_API_KEY"),
-    )
+            os.remove(f"{os.path.realpath(rx.get_upload_dir())}/{f}")
+        return UploadState.cancel_upload
 
 
 class State(ModelSelectionMixin, rx.State):
     """General App State."""
-    # The current question being asked.
-    question: str
-    # Whether the app is processing a question.
-    processing: bool = False
-    # Keep track of the chat history as a list of (question, answer, model, nb_input_tokens, nb_output_tokens) tuples.
-    chat_history: list[tuple[str, str, str, int, int]] = []
-    # Keep history of messages for continuity between follow-up prompts
-    messages_history: list[tuple[str, str]] = []
-    user_id: str = str(uuid.uuid4())
-
+    rag_input: list[dict] = []
     query_engine: str
     nb_input_tokens: int
-    nb_output_tokens: int
-    rag_input: list[dict] = []
-
 
     # Extract text from all pages of a PDF and return it in one chunk
     def extract_text_from_pdf(self, pdf_bytes):
@@ -108,17 +90,24 @@ class State(ModelSelectionMixin, rx.State):
         for pdf_doc in os.listdir("./uploaded_files"):
             self.extract_text_from_pdf(f"./uploaded_files/{pdf_doc}")
 
+    # The current question being asked.
+    question: str
 
-    @rx.event
-    async def answer(self, model): #, *args, **kwargs):
-        model = self.llm_engine
+    # Whether the app is processing a question.
+    processing: bool = False
+
+    # Keep track of the chat history as a list of (question, answer) tuples.
+    chat_history: list[tuple[str, str]] = []
+
+    user_id: str = str(uuid.uuid4())
+
+    async def answer(self):
         # Set the processing state to True.
         self.processing = True
         yield
 
-        # Convert chat history to a list of dictionaries
+        # convert chat history to a list of dictionaries
         chat_history_dicts = []
-        messages_history = []
         for chat_history_tuple in self.chat_history:
             chat_history_dicts.append(
                 {"role": "user", "content": chat_history_tuple[0]}
@@ -126,63 +115,65 @@ class State(ModelSelectionMixin, rx.State):
             chat_history_dicts.append(
                 {"role": "assistant", "content": chat_history_tuple[1]}
             )
-            chat_history_dicts.append(
-                {"model": chat_history_tuple[2]}
-            )
-            chat_history_dicts.append(
-                {"nb_input_tokens": chat_history_tuple[3]}
-            )
-            chat_history_dicts.append(
-                {"nb_output_tokens": chat_history_tuple[4]}
-            )
-            # Build up current message on the basis of all previous messages
-            messages_history.append(
-                {"role": "user", "content": chat_history_tuple[0]}
-            )
-            messages_history.append(
-                {"role": "assistant", "content": chat_history_tuple[1]}
-            )
 
-        self.chat_history.append((self.question, "", "", 0, 0))
+        self.chat_history.append((self.question, ""))
 
         # Clear the question input.
         question = self.question
         self.question = ""
+
         # Yield here to clear the frontend input before continuing.
         yield
 
-        messages_history.append({"role": "assistant", "content": question})
+        # client = httpx.AsyncClient()
 
-        # Ingest PDF text
+        # call the agentic workflow
+        # input_payload = {
+        #     "chat_history_dicts": chat_history_dicts,
+        #     "user_input": question,
+        # }
+        # input_headers = {
+        #     "Authorization": f"Bearer {os.environ.get('OPENROUTER_API_KEY')}",
+        #     "Content-Type": "application/json",
+        # }
+
+        # deployment_name = os.environ.get("DEPLOYMENT_NAME", "MyDeployment")
+        # apiserver_url = "https://openrouter.ai/api/v1/chat/completions",
+        # response = await client.post(
+        #     f"{apiserver_url}",
+        #     headers=input_headers,
+        #     json={"input": json.dumps(input_payload)},
+        #     timeout=60,
+        # )
+        # answer = response.text
+
         self.query_pdf()
 
+        load_dotenv(".env")
+        client = AsyncOpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=os.environ.get("OPENROUTER_API_KEY"),
+            )
 
-        # Synchronous OpenAI call in an async handler
-        def get_openai_response():
+        
+        async def query_llm(self, model=self.llm_engine, *args, **kwargs):
+            model = model
             response = client.chat.completions.create(
                 model= model,
                 messages=[
-                {
-                    "role": "user",
-                    "content": f"{self.rag_input} All preceding content, if any, is PROMPT_CONTEXT. Use PROMPT_CONTEXT to help yourself answer user prompts. {messages_history}.",
-                }
-            ], 
-            # temperature=0.7,
-            # max_tokens=512,
-            stream=False,
+                    {
+                        "role": "user",
+                        "content": f"{self.rag_input}. Today is Sunday 1st January 1978. Consider all preceding content as PROMPT_CONTEXT. Use PROMPT_CONTEXT to answer what follows. {self.question}",
+                    }
+                ], 
             )
-            return response #.choices[0].message.content
-        
-        loop = asyncio.get_event_loop()
-        raw_answer = await loop.run_in_executor(None, get_openai_response) # response.choices[0].message.content
-        answer = raw_answer.choices[0].message.content
-        # Extract other elements from the response
-        query_engine = raw_answer.model
-        self.query_engine = query_engine
-        nb_input_tokens = raw_answer.usage.prompt_tokens
-        self.nb_input_tokens = nb_input_tokens
-        nb_output_tokens = raw_answer.usage.completion_tokens
-        self.nb_output_tokens = nb_output_tokens
+            return response
+
+
+        response = query_llm()
+        answer = response.choices[0].message.content
+        self.query_engine = response.model
+        self.nb_input_tokens = response.usage.prompt_tokens
 
 
         for i in range(len(answer)):
@@ -194,32 +185,46 @@ class State(ModelSelectionMixin, rx.State):
                 answer[: i + 1],
             )
             yield
-
-        self.chat_history[-1] = (self.chat_history[-1][0], answer, query_engine, nb_input_tokens, nb_output_tokens)
         
+
         # Add to the answer as the chatbot responds.
         answer = ""
         yield
 
+        # async for item in json.loads(json.dumps(serial_response), 
+        #                              object_hook=lambda item: SimpleNamespace(**item)):
+        
+
+        async def async_choices(response):
+            for choice in response.choices[0]:
+                if isinstance(choice, tuple):
+                    choice = choice[0]
+                if hasattr(choice, "delta"):
+                    yield choice
+
+        async for choice in async_choices(response):
+            if getattr(choice.delta, "content", None) is None:
+                break
+            answer += choice.delta.content
+            self.chat_history[-1] = (self.chat_history[-1][0], answer)
+            yield # choice.delta.content
+
         # Ensure the final answer is added to chat history
         if answer:
-            self.chat_history[-1] = (self.chat_history[-1][0], answer, query_engine, nb_input_tokens, nb_output_tokens)
+            self.chat_history[-1] = (self.chat_history[-1][0], answer)
             yield
-
 
         # Set the processing state to False.
         self.processing = False
 
-        
     async def handle_key_down(self, key: str):
         if key == "Enter":
             async for t in self.answer():
                 yield t
 
-    @rx.event
     def clear_chat(self):
         # Reset the chat history and processing state
         self.chat_history = []
         self.processing = False
-        yield
+
 

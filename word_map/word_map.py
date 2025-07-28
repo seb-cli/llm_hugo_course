@@ -1,12 +1,14 @@
 import reflex as rx
 
 from word_map import style
-from word_map.state import SettingsState, UploadState
+from word_map.state import SettingsState, UploadState, State
 from word_map.components.settings import settings_icon
 from word_map.components.reset import reset
 from word_map.views.templates import templates
-from word_map.views.chat import chat, action_bar, rag_input
+from word_map.views.chat import chat, action_bar #, rag_input
 
+# def custom_backend_handler(exception: Exception):
+#     return State.clear_chat()  # Triggers the frontend reset
 
 @rx.page(
     title="Word Map",
@@ -42,6 +44,8 @@ def index() -> rx.Component:
 
 
 app = rx.App(stylesheets=style.STYLESHEETS, style={"font_family": "var(--font-family)"})
+# app.backend_exception_handler(custom_backend_handler)
+
 # app.add_page(
 #     index, title="Chatbot", description="A chatbot powered by Reflex!"
 # )
