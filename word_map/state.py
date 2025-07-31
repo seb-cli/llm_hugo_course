@@ -167,7 +167,9 @@ class State(ModelSelectionMixin, rx.State):
                     "content": f"{self.rag_input} All preceding content, if any, is PROMPT_CONTEXT. Use PROMPT_CONTEXT to help yourself answer user prompts. {messages_history}.",
                 }
             ], 
-            # temperature=0.7,
+            # max_tokens=150,
+            temperature=0.0,
+            top_p=0.1,
             # max_tokens=512,
             stream=False,
             )
