@@ -3,7 +3,7 @@ from word_map.state import State
 
 template_prompts_ddicts = {
     "jobs": {"icon": "route",
-             "title": "Get all job positions",
+             "title": "Get all job titles and employers",
              "description": "Make a list of all the people mentioned and their past and current places of employment. Your output should be a table with the people's first and last name as column titles, and each employment place as a cell under the respective names",
     },
     "countries": {"icon": "earth",
@@ -11,16 +11,16 @@ template_prompts_ddicts = {
                   "description": "Plot a world map and place a pin on each country where the people mentioned worked, with the pin label being the first and last names of the person in question",
     },
     "skills": {"icon": "brain-circuit",
-               "title": "List skills",
+               "title": "List all skills, 'one hot encoding' style",
                "description": "Make a table with every skill mentioned as the first cell in each row and the names of each person mentioned as the title of a different column. Then add a cross in every cell corresponding to the person and relevant skill. Make sure that the cross is centred horizontally in every column",
     },
     "languages": {"icon": "languages",
-                  "title": "Show all languages",
+                  "title": "Show all languages with country flags",
                   "description": "For every person mentioned, write their first name, last name, and draw next to these the flags corresponding to every language they mention in their language skills",
     }
 }
 
-def template_card(icon: str, title: str, description: str, color: str) -> rx.Component:
+def template_card(icon: str, title: str, description: str, color: str, disabled: bool) -> rx.Component:
     return rx.el.button(
         rx.icon(tag=icon, color=rx.color(color, 9), size=32),
         rx.text(title, class_name="font-medium text-slate-11 text-sm"),
@@ -33,7 +33,7 @@ def template_card(icon: str, title: str, description: str, color: str) -> rx.Com
 
 def templates() -> rx.Component:
     return rx.box(
-        rx.heading("Find Your Future Recruits (incl. Eval loop)"),
+        rx.heading("Find Your Future Recruits."),
         rx.image(
             src="/word_map.png",
             height="200px",
@@ -45,29 +45,65 @@ def templates() -> rx.Component:
         #    rx.text("the world of your documents", size="4")
         # ),
         rx.box(
-            template_card(
-                template_prompts_ddicts["jobs"]["icon"],
-                template_prompts_ddicts["jobs"]["title"],
-                template_prompts_ddicts["jobs"]["description"],
-                "grass",
+            rx.vstack(
+                template_card(
+                    template_prompts_ddicts["jobs"]["icon"],
+                    template_prompts_ddicts["jobs"]["title"],
+                    template_prompts_ddicts["jobs"]["description"],
+                    "grass",
+                    False,
+                ),
+                rx.button(
+                    rx.icon("flask-conical"),
+                    rx.text("Evaluated"),
+                    variant="soft",
+                    color_scheme="green",
+                ),
             ),
-            template_card(
-                template_prompts_ddicts["countries"]["icon"],
-                template_prompts_ddicts["countries"]["title"],
-                template_prompts_ddicts["countries"]["description"],
-                "tomato",
+            rx.vstack(
+                template_card(
+                    template_prompts_ddicts["countries"]["icon"],
+                    template_prompts_ddicts["countries"]["title"],
+                    template_prompts_ddicts["countries"]["description"],
+                    "tomato",
+                    False,
+                ),
+                rx.button(
+                    rx.icon("flask-conical"),
+                    rx.text("Evaluated"),
+                    variant="soft",
+                    color_scheme="green",
+                ),
             ),
-            template_card(
-                template_prompts_ddicts["skills"]["icon"],
-                template_prompts_ddicts["skills"]["title"],
-                template_prompts_ddicts["skills"]["description"],
-                "blue",
+            rx.vstack(
+                template_card(
+                    template_prompts_ddicts["skills"]["icon"],
+                    template_prompts_ddicts["skills"]["title"],
+                    template_prompts_ddicts["skills"]["description"],
+                    "blue",
+                    True,
+                ),
+                rx.button(
+                    rx.icon("flask-conical-off"),
+                    rx.text("Not evaluated"),
+                    variant="soft",
+                    color_scheme="red",
+                ),
             ),
-            template_card(
-                template_prompts_ddicts["languages"]["icon"],
-                template_prompts_ddicts["languages"]["title"],
-                template_prompts_ddicts["languages"]["description"],
-                "blue",
+            rx.vstack(
+                template_card(
+                    template_prompts_ddicts["languages"]["icon"],
+                    template_prompts_ddicts["languages"]["title"],
+                    template_prompts_ddicts["languages"]["description"],
+                    "orange",
+                    False,
+                ),
+                rx.button(
+                    rx.icon("flask-conical"),
+                    rx.text("Evaluated"),
+                    variant="soft",
+                    color_scheme="green",
+                ),            
             ),
             class_name="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 w-full",
         ),
