@@ -33,7 +33,7 @@ def template_card(icon: str, title: str, description: str, color: str) -> rx.Com
 
 def templates() -> rx.Component:
     return rx.box(
-        rx.heading("Find Your Future Recruits"),
+        rx.heading("Find Your Future Recruits (incl. Eval loop)"),
         rx.image(
             src="/word_map.png",
             height="200px",
