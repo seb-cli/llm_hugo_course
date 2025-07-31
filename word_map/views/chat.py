@@ -64,7 +64,7 @@ def chat() -> rx.Component:
 def select_llm_engine() -> rx.Component:
     return rx.center(
         rx.select(
-            ["google/gemma-3n-e4b-it:free", "openai/gpt-3.5-turbo", "deepseek/deepseek-r1-0528:free"],
+            ["google/gemma-3n-e4b-it:free", "openai/gpt-3.5-turbo", "deepseek/deepseek-r1-0528:free", "qwen/qwen3-coder:free", "mistralai/mistral-small-3.2-24b-instruct:free"],
             value=State.llm_engine,
             on_change=State.change_value,
         ),
