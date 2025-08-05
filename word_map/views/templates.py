@@ -33,17 +33,17 @@ def template_card(icon: str, title: str, description: str, color: str, disabled:
 
 def templates() -> rx.Component:
     return rx.box(
-        rx.heading("Find Your Future Recruits."),
+        rx.heading("Word Map."),
         rx.image(
             src="/word_map.png",
             height="200px",
             border_radius="150px 150px",
             # class_name="opacity-70 w-auto h-11 pointer-events-none",
         ),
-        # rx.hstack(
-        #    rx.text.kbd("Enter"),
-        #    rx.text("the world of your documents", size="4")
-        # ),
+        rx.hstack(
+           rx.text.kbd("Enter", size="5"),
+           rx.text("the world of your documents", size="4")
+        ),
         rx.box(
             rx.vstack(
                 template_card(
